@@ -1,7 +1,9 @@
 import 'package:clima/services/location.dart';
+import 'package:clima/services/networking.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import 'location_screen.dart';
 
 const apiKey = '29648725080b48e093bf9ae1f7c1cde3';
 
@@ -14,49 +16,45 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   double latitude, longitude;
 
-  void getLocation() async{
+  void initState(){
+    super.initState();
+//    print('>>>>>>>>>>>>>>>>>>>init<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    getLocationData();
+  }
+
+  void getLocationData() async{
     Location location =Location();
     await location.getCurrentLocation();
 
     latitude = location.lattitude;
     longitude = location.longitude;
-    print(latitude.toString() + ' ' + longitude.toString());
-    getData();
-  }
 
-  void getData() async{
-    http.Response response = await http.get('https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey');
-    if (response.statusCode == 200) {
-      String data = response.body;
-      var decodedDara = jsonDecode(data);
-      var temperature = decodedDara['main']['temp'];
-      var condition = decodedDara['weather'][0]['id'];
-      var cityname = decodedDara['name'];
-      var lat = decodedDara['coord']['lon'];
-      var lon = decodedDara['coord']['lat'];
-
-      print(temperature);
-      print(condition);
-      print(cityname);
-      print(lat);
-      print(lon);
-      print('https://samples.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey');
-    }
-    else{
-      print(response.statusCode);
-    }
+    NetworkHelper networkHelper = NetworkHelper('https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey');
+    var weatherData = await networkHelper.getData();
+    print(weatherData);
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return LocationScreen();
+    }));
   }
 
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: RaisedButton(
-          onPressed: () {
-            getLocation();//Get the current location
-          },
-          child: Text('Get Location'),
+        child: SpinKitDoubleBounce(
+          color: Colors.white,
+          size: 100.0,
         ),
       ),
+//      body: Center(
+//        child: RaisedButton(
+//          onPressed: () {
+//            print('build');
+//            getLocationData();//Get the current location
+//          },
+//          child: Text('Get Location'),
+//        ),
+//
+//      ),
     );
   }
 }
