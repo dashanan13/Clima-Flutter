@@ -1,7 +1,9 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:clima/screens/city_screen.dart';
 import 'package:clima/screens/city_details.dart';
 import 'package:clima/services/weather.dart';
 import 'package:clima/utilities/reusable_card.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:clima/utilities/constants.dart';
 import 'package:time_formatter/time_formatter.dart';
@@ -55,31 +57,43 @@ class _LocationScreenState extends State<LocationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Arbeid Weather'),
-          actions: <Widget>[
-            IconButton(
+      appBar: AppBar(
+        title: const Text('Arbeid Weather'),
+        actions: <Widget>[
+          IconButton(
               icon: const Icon(Icons.add_circle_outline),
               tooltip: 'New City',
               onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return _MyDialog();
+                    });
               },
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              tooltip: 'Refresh',
-              onPressed: () async {
-                  var weatherData = await weather.getLocationWeather();
-                  updateUI(weatherData);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.settings),
-              tooltip: 'Settings',
-              onPressed: () {
-              },
-            ),
-          ],
-        ),
+              ),
+//              onPressed: () async {
+//                      var typedName = await Navigator.push(context, MaterialPageRoute(builder: (context) { return CityScreen(); },),);
+//                      if (typedName != null) {
+//                        var weatherData =
+//                            await weather.getCityWeather(typedName);
+//                        updateUI(weatherData);
+//                      }
+//                    },
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
+            onPressed: () async {
+              var weatherData = await weather.getLocationWeather();
+              updateUI(weatherData);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () {},
+          ),
+        ],
+      ),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -102,13 +116,14 @@ class _LocationScreenState extends State<LocationScreen> {
                   onPressed: () async {
                     var weatherData = await weather.getLocationWeather();
                     updateUI(weatherData);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
                       return CityDetails(
                         cityDetailsinfo: weatherData,
                       );
                     }));
                   },
-                  padding: EdgeInsets.only(left: 10, right: 10),
+                  padding: EdgeInsets.only(left: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
@@ -151,6 +166,16 @@ class _LocationScreenState extends State<LocationScreen> {
                             temperature.toInt().toString() + '°',
                             textAlign: TextAlign.left,
                             style: kBoldTextStyle,
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle_outline),
+                            tooltip: 'Settings',
+                            onPressed: () {},
                           ),
                         ],
                       ),
@@ -227,6 +252,80 @@ class _LocationScreenState extends State<LocationScreen> {
 //              ),
 //            ],
 //          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MyDialog extends StatefulWidget {
+//  final String newCity;
+//  final Widget dialogWidget;
+//  _MyDialog({this.newCity, this.dialogWidget});
+  _MyDialog();
+
+  @override
+  _MyDialogState createState() => _MyDialogState();
+}
+
+class _MyDialogState extends State<_MyDialog> {
+  List<String> _tempSelectedCities = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white.withOpacity(0.7),
+      shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
+      insetPadding: EdgeInsets.all(30),
+      child: Container(
+        padding: EdgeInsets.all(10.0),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'Select a new city...',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+              SizedBox(height: 10,),
+              TextField(
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+                decoration: kTextFieldInputDecoration,
+              ),
+              SizedBox(height: 10,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  RaisedButton(
+                    shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
+                    color: Colors.green.withOpacity(.8),
+                    elevation: 20,
+                    onPressed: () {},
+                    child: const Text('Save',style: TextStyle(fontSize: 15,),
+                    ),
+                  ),
+                  SizedBox(width: 20,),
+                  RaisedButton(
+                    shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
+                    color: Colors.red.withOpacity(.8),
+                    elevation: 20,
+                    onPressed: () {},
+                    child: const Text('Discard',style: TextStyle(fontSize: 15,),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
