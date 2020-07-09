@@ -29,6 +29,10 @@ class MyDialogState extends State<MyDialog> {
   GPlaces gplaces = GPlaces();
   WeatherModel weatherCustom = WeatherModel();
 
+  // Create a text controller. Later, use it to retrieve the
+  // current value of the TextField.
+  final searchController = TextEditingController();
+
   void initState() {
     super.initState();
     print('init');
@@ -37,6 +41,14 @@ class MyDialogState extends State<MyDialog> {
       'Delhi, India',
       'Oslo, Norway',
     ];
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is removed from the
+    // widget tree.
+    searchController.dispose();
+    super.dispose();
   }
 
   void resetSugggestions(List<String> _tempsuggestions){
@@ -66,6 +78,7 @@ class MyDialogState extends State<MyDialog> {
               ),
               //search field for new city
               TextField(
+                controller: searchController,
                 autofocus: true,
                 autocorrect: true,
                 style: TextStyle(
@@ -143,7 +156,8 @@ class MyDialogState extends State<MyDialog> {
     return GestureDetector(
       onTap: () async {
         print(suggestiontext);
-          
+          // TODO: access and replace text field string with suggestion
+        searchController.text = suggestiontext;
         },
       child: Padding(
         padding: const EdgeInsets.all(5.0),
