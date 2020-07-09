@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:clima/utilities/constants.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
+
+// [OBSOLETE] Dedicated screen to search city
 
 class CityScreen extends StatefulWidget {
   @override

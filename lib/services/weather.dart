@@ -1,13 +1,22 @@
 import 'package:clima/services/location.dart';
 import 'networking.dart';
 
+// Gets weather information by coordinated and location names
+
 const apiKey = '29648725080b48e093bf9ae1f7c1cde3';
 const openWeathermapURL = 'https://api.openweathermap.org/data/2.5/weather';
 
 class WeatherModel {
 
   Future<dynamic> getCityWeather(String cityName) async {
-    NetworkHelper networkHelper = NetworkHelper('$openWeathermapURL?q=$cityName&appid=$apiKey&units=metric');
+    String formatText = cityName.replaceAll(' ', '+');
+    NetworkHelper networkHelper = NetworkHelper('$openWeathermapURL?q=$formatText&appid=$apiKey&units=metric');
+    var weatherData = await networkHelper.getData();
+    return weatherData;
+  }
+
+  Future<dynamic> getCoordinateWeather(double latitude, double longitude) async {
+    NetworkHelper networkHelper = NetworkHelper('$openWeathermapURL?lat=$latitude&lon=$longitude&appid=$apiKey&units=metric');
     var weatherData = await networkHelper.getData();
     return weatherData;
   }

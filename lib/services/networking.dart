@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+// Utility to intereact with API
 
 class NetworkHelper{
 
@@ -15,7 +16,7 @@ class NetworkHelper{
       return decodedData;
     }
     else{
-      print(response.statusCode);
+      print('HTTP Fail: ${response.statusCode}');
     }
   }
 

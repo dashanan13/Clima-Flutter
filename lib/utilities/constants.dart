@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// Constants
+
 const kTempTextStyle = TextStyle(
   fontFamily: 'Spartan MB',
   fontSize: 100.0,
@@ -33,6 +35,7 @@ const kTextFieldInputDecoration = InputDecoration(
   hintText: 'Enter city name',
   hintStyle: TextStyle(
     color: Colors.grey,
+    fontSize: 20
   ),
   border: OutlineInputBorder(
     borderRadius: BorderRadius.all(Radius.circular(30.0),),

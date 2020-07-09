@@ -3,7 +3,7 @@ import 'package:clima/utilities/constants.dart';
 import 'package:clima/utilities/reusable_card.dart';
 import 'package:flutter/material.dart';
 
-import 'city_screen.dart';
+//This file deals with detailed weather of each city
 
 class CityDetails extends StatefulWidget {
   final cityDetailsinfo;
@@ -21,7 +21,7 @@ class _CityDetailsState extends State<CityDetails> {
   @override
   void initState() {
     // TODO: implement initState
-    print(widget.cityDetailsinfo);
+    super.initState();
     updateUI(widget.cityDetailsinfo);
   }
 
@@ -35,9 +35,6 @@ class _CityDetailsState extends State<CityDetails> {
         countryName = '';
       } else {
         temperature = double.parse((weatherData['main']['temp']).toString());
-        var condition = weatherData['weather'][0]['id'];
-//        weatherIcon = weather.getWeatherIcon(condition);
-//        weatherMessage = weather.getMessage(temperature.toInt());
         weatherIcon = (weatherData['weather'][0]['icon']).toString();
         weatherMessage = weatherData['weather'][0]['main'];
         cityName = weatherData['name'];
@@ -45,9 +42,6 @@ class _CityDetailsState extends State<CityDetails> {
         dateTimeData = DateTime.fromMillisecondsSinceEpoch(
             ((weatherData['dt']) + (weatherData['timezone'])) * 1000,
             isUtc: true);
-        print(DateTime.fromMillisecondsSinceEpoch(
-            ((1593910050) + (-18000)) * 1000,
-            isUtc: true));
       }
     });
   }
