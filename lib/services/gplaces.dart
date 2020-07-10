@@ -19,13 +19,15 @@ class GPlaces {
 
   Future<List> getSuggestions(String text) async {
     if ((text.isNotEmpty) && (text.length != 0)) {
-      _suggestions = ['','',''];
+//      _suggestions = ['','',''];
+      _suggestions = [];
       String queryURL ='https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$text&types=(cities)&key=$_gPlacesKey';
       NetworkHelper gplacesresponse = NetworkHelper(queryURL);
       var gplacespredictions = await gplacesresponse.getData();
       //TODO: iterate the results so that the assignment does not run out of bound.
       for (var i=0; i< (gplacespredictions['predictions']).length && i< 3; i++){
-        _suggestions[i] = gplacespredictions['predictions'][i]['description'];
+//        _suggestions[i] = gplacespredictions['predictions'][i]['description'];
+        _suggestions.add(gplacespredictions['predictions'][i]['description']);
       }
       return _suggestions;
     } else {
