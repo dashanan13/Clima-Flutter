@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:clima/screens/localInteraction.dart';
 import 'package:clima/services/gplaces.dart';
 import 'package:clima/services/weather.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +20,8 @@ class MyDialog extends StatefulWidget {
       @required this.dialogText,
       this.onDialogSubmit,
       @required this.okButtonText,
-      @required this.cancelButtonText});
+      @required this.cancelButtonText}
+      );
 
   @override
   MyDialogState createState() => MyDialogState();
@@ -27,11 +31,15 @@ class MyDialogState extends State<MyDialog> {
 
   List<String> _suggestions = [];
   GPlaces gplaces = GPlaces();
-  WeatherModel weatherCustom = WeatherModel();
+  String updateCity;
+  bool _btnEnable=false;
 
   // Create a text controller. Later, use it to retrieve the
   // current value of the TextField.
   final searchController = TextEditingController();
+
+  LocalStorage lStorage = LocalStorage();
+  WeatherModel weatherCustom = WeatherModel();
 
   void initState() {
     super.initState();
@@ -41,6 +49,7 @@ class MyDialogState extends State<MyDialog> {
       'Delhi, India',
       'Oslo, Norway',
     ];
+    searchController.text='';
   }
 
   @override
@@ -90,22 +99,14 @@ class MyDialogState extends State<MyDialog> {
                   List<String> _tempsuggestions = await gplaces.getSuggestions(text);
                   resetSugggestions(_tempsuggestions);
                 },
-                onSubmitted:(text) async {
-                  List<String> _tempsuggestions = await gplaces.getSuggestions(text);
-                  resetSugggestions(_tempsuggestions);
-                },
               ),
+// TODO: Make sure the suggestion area is size flexible, without suggestion its height should be 0 and with suggestion it should be equal to the height of suggestions
               Container(
                 height: 100,
                 child: ListView(
-                  children: <Widget>[
-                    _buildTextwithGesture(_suggestions[0], 15.0),
-                    _buildTextwithGesture(_suggestions[1], 15.0),
-                    _buildTextwithGesture(_suggestions[2], 15.0),
-                  ],
+                  children: _suggestionSpace(),
                 ),
               ),
-
               SizedBox(
                 height: 5,
               ),
@@ -117,7 +118,7 @@ class MyDialogState extends State<MyDialog> {
                         borderRadius: new BorderRadius.circular(20.0)),
                     color: Colors.green.withOpacity(.8),
                     elevation: 20,
-                    onPressed: () {},
+                    onPressed: _btnEnable ? () {lStorage.writeFile(writeMode: FileMode.append, inputText: updateCity, isCityNameFile: true);} : null,
                     child: Text(
                       widget.okButtonText,
                       style: TextStyle(
@@ -135,6 +136,7 @@ class MyDialogState extends State<MyDialog> {
                     elevation: 20,
                     onPressed: () {
                       Navigator.pop(context, true);
+                      dispose();
                     },
                     child: Text(
                       widget.cancelButtonText,
@@ -152,12 +154,28 @@ class MyDialogState extends State<MyDialog> {
     );
   }
 
+  List<Widget> _suggestionSpace() {
+    List<Widget> suggestionSpace = [];
+    print('Suggestions length: ' + _suggestions.length.toString());
+    for(var suggestion in _suggestions){
+      print('Individual suggestion: ' + suggestion.toString());
+      if (suggestion != ''){
+        suggestionSpace.add(_buildTextwithGesture(suggestion, 15.0));
+      }
+      print('Suggestion Space length: ' + suggestionSpace.length.toString());
+      return suggestionSpace;
+    }
+  }
+
   GestureDetector _buildTextwithGesture(String suggestiontext, double font) {
     return GestureDetector(
       onTap: () async {
         print(suggestiontext);
-          // TODO: access and replace text field string with suggestion
         searchController.text = suggestiontext;
+        updateCity= suggestiontext;
+        setState(() {
+          _btnEnable=true;
+        });
         },
       child: Padding(
         padding: const EdgeInsets.all(5.0),

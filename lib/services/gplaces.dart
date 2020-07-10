@@ -1,3 +1,6 @@
+import 'dart:collection';
+import 'dart:convert';
+
 import 'networking.dart';
 
 // Google API interactions
@@ -12,20 +15,18 @@ class GPlaces {
   ];
 
   List<String> _tempCoordinates = ['0.0', '0.0'];
-
   List<String> _suggestions = [];
 
   Future<List> getSuggestions(String text) async {
     if ((text.isNotEmpty) && (text.length != 0)) {
-      print(text);
+      _suggestions = ['','',''];
       String queryURL ='https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$text&types=(cities)&key=$_gPlacesKey';
       NetworkHelper gplacesresponse = NetworkHelper(queryURL);
       var gplacespredictions = await gplacesresponse.getData();
-      _suggestions = [
-        gplacespredictions['predictions'][0]['description'],
-        gplacespredictions['predictions'][1]['description'],
-        gplacespredictions['predictions'][2]['description'],
-      ];
+      //TODO: iterate the results so that the assignment does not run out of bound.
+      for (var i=0; i< (gplacespredictions['predictions']).length && i< 3; i++){
+        _suggestions[i] = gplacespredictions['predictions'][i]['description'];
+      }
       return _suggestions;
     } else {
       return _templocations;
@@ -38,8 +39,6 @@ class GPlaces {
       String queryURL ='https://maps.googleapis.com/maps/api/geocode/json?address=$formatText&key=$_gGeoCodingKey';
       NetworkHelper gplacesresponse = NetworkHelper(queryURL);
       var gplacespredictions = await gplacesresponse.getData();
-      print(queryURL);
-      print(gplacespredictions);
     } else {
 //      return _tempCoordinates;
     }
