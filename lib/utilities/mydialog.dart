@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:clima/screens/localInteraction.dart';
+import 'file:///C:/MobileApps/Apps/Clima-Flutter/lib/utilities/localInteraction.dart';
 import 'package:clima/services/gplaces.dart';
 import 'package:clima/services/weather.dart';
 import 'package:flutter/material.dart';
@@ -45,22 +45,38 @@ class MyDialogState extends State<MyDialog> {
     super.initState();
     print('init');
     _suggestions = [
-      'New York US',
-      'Delhi, India',
-      'Oslo, Norway',
+      'Type the name of a city, wait for the suggestions and ',
+      'select a location from suggestions.',
+      'Click outside dialog to dismiss!'
     ];
-    searchController.text='';
+    searchController.clearComposing();
+    searchController.clear();
   }
 
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is removed from the
-    // widget tree.
-    searchController.dispose();
-    super.dispose();
-  }
+  //TODO: Make sure to implement dispose function such that TextEditingController is disposed and so is the the dialog
+//  @override
+//  void dispose() {
+//    // Clean up the controller when the widget is removed from the
+//    // widget tree.
+//    searchController.dispose();
+//    super.dispose();
+//  }
 
-  void resetSugggestions(List<String> _tempsuggestions){
+  Future<void> resetSugggestions(text) async {
+    List<String> _tempsuggestions=[];
+    _suggestions.clear();
+    if(searchController.text.isEmpty || (text == '')){
+      searchController.clearComposing();
+      _tempsuggestions = [
+        'Type the name of a city,',
+        'wait for the suggestions and ',
+        'select a location from suggestions',
+      ];
+    }else{
+      _tempsuggestions = await gplaces.getSuggestions(text);
+      if (_tempsuggestions.length == 0) { _tempsuggestions = ['Um, that\'s not a place', 'wana redo?', 'maybe check the speeling...']; }
+      if (_tempsuggestions.length > 3) { _tempsuggestions = _tempsuggestions.getRange(0, 3).toList(); }
+    }
     setState(() {
       _suggestions = _tempsuggestions;
     });
@@ -95,9 +111,11 @@ class MyDialogState extends State<MyDialog> {
                     fontSize: 20,
                     fontWeight: FontWeight.bold),
                 decoration: kTextFieldInputDecoration,
-                onChanged: (text) async {
-                  List<String> _tempsuggestions = await gplaces.getSuggestions(text);
-                  resetSugggestions(_tempsuggestions);
+                onChanged: (text)  {
+                  if (text == null) {
+                      searchController.selection = TextSelection.collapsed(offset: 0);
+                    }
+                  resetSugggestions(text);
                 },
               ),
 // TODO: Make sure the suggestion area is size flexible, without suggestion its height should be 0 and with suggestion it should be equal to the height of suggestions
@@ -118,7 +136,18 @@ class MyDialogState extends State<MyDialog> {
                         borderRadius: new BorderRadius.circular(20.0)),
                     color: Colors.green.withOpacity(.8),
                     elevation: 20,
-                    onPressed: _btnEnable ? () {lStorage.writeFile(writeMode: FileMode.append, inputText: updateCity, isCityNameFile: true);} : null,
+                    onPressed: () async {
+                      var temp = await lStorage.readFile(isCityNameFile: true);
+                      if (temp.contains(updateCity)){
+
+                        setState(() {
+                          _suggestions = ['This city already exists', 'in the weather list.', 'You could try a new city!'];
+                        });
+                      }else {
+                        print('Writing to Cities file');
+                        await lStorage.writeFile(writeMode: FileMode.append, inputText: updateCity, isCityNameFile: true);
+                      }
+                    },
                     child: Text(
                       widget.okButtonText,
                       style: TextStyle(
@@ -126,25 +155,27 @@ class MyDialogState extends State<MyDialog> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  RaisedButton(
-                    shape: new RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20.0)),
-                    color: Colors.red.withOpacity(.8),
-                    elevation: 20,
-                    onPressed: () {
-                      Navigator.pop(context, true);
-                      dispose();
-                    },
-                    child: Text(
-                      widget.cancelButtonText,
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
+
+//                  SizedBox(
+//                    width: 20,
+//                  ),
+                  //TODO: Implement dismiss button to make sure user can cancel without clicking outside the dialog
+//                  RaisedButton(
+//                    shape: new RoundedRectangleBorder(
+//                        borderRadius: new BorderRadius.circular(20.0)),
+//                    color: Colors.red.withOpacity(.8),
+//                    elevation: 20,
+//                    onPressed: () {
+//                      Navigator.pop(context, true);
+//                      dispose();
+//                    },
+//                    child: Text(
+//                      widget.cancelButtonText,
+//                      style: TextStyle(
+//                        fontSize: 15,
+//                      ),
+//                    ),
+//                  ),
                 ],
               ),
             ],
@@ -156,25 +187,21 @@ class MyDialogState extends State<MyDialog> {
 
   List<Widget> _suggestionSpace() {
     List<Widget> suggestionSpace = [];
-    print('Suggestions length: ' + _suggestions.length.toString());
-    for(var suggestion in _suggestions){
-      print('Individual suggestion: ' + suggestion.toString());
-      if (suggestion != ''){
-        suggestionSpace.add(_buildTextwithGesture(suggestion, 15.0));
-      }
-      print('Suggestion Space length: ' + suggestionSpace.length.toString());
-      return suggestionSpace;
+    for(var i=0; i< _suggestions.length && i<3; i++) {
+      suggestionSpace.add(_buildTextwithGesture(_suggestions[i], 15.0));
     }
+    _suggestions.clear();
+    return suggestionSpace;
   }
 
   GestureDetector _buildTextwithGesture(String suggestiontext, double font) {
     return GestureDetector(
       onTap: () async {
-        print(suggestiontext);
         searchController.text = suggestiontext;
         updateCity= suggestiontext;
         setState(() {
           _btnEnable=true;
+          _suggestions = ['Cool, you found it', 'Press \'Save\' to add it', 'to the list'];
         });
         },
       child: Padding(

@@ -26,7 +26,6 @@ class GPlaces {
       var gplacespredictions = await gplacesresponse.getData();
       //TODO: iterate the results so that the assignment does not run out of bound.
       for (var i=0; i< (gplacespredictions['predictions']).length && i< 3; i++){
-//        _suggestions[i] = gplacespredictions['predictions'][i]['description'];
         _suggestions.add(gplacespredictions['predictions'][i]['description']);
       }
       return _suggestions;

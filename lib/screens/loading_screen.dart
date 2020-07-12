@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:clima/services/weather.dart';
 import 'package:flutter/material.dart';
-import 'localInteraction.dart';
+import '../utilities/localInteraction.dart';
 import 'location_screen.dart';
 
 //Initial Loading screen that redirects to Location Screen
@@ -25,7 +25,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   void getLocationData() async {
 
-    await lStorage.writeFile(writeMode: FileMode.write, inputText: 'Lucknow, India|Local|London, GB', isCityNameFile: null);
+    await lStorage.writeFile(writeMode: FileMode.write, inputText: 'Local', isCityNameFile: null);
     var weatherData = await weatherModel.getLocationWeather();
     Navigator.push(
       context,

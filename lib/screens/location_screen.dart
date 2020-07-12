@@ -1,4 +1,4 @@
-import 'package:clima/screens/localInteraction.dart';
+import 'file:///C:/MobileApps/Apps/Clima-Flutter/lib/utilities/localInteraction.dart';
 import 'package:clima/utilities/mydialog.dart';
 import 'package:clima/utilities/reusable_summary.dart';
 import 'package:flutter/cupertino.dart';
@@ -45,7 +45,7 @@ class _LocationScreenState extends State<LocationScreen> {
                     );
                   }).then((_) =>
                   setState(() {
-
+                    buildcards();
                   }));
             },
           ),
@@ -77,9 +77,7 @@ class _LocationScreenState extends State<LocationScreen> {
   Future<List<Card>> buildcards() async {
     var cities = await lStorageloc.readFile(isCityNameFile: true);
     myCityCards.clear();
-    print(myCityCards.length.toString());
     for (var i=0 ; i< (cities.length -1) ; i++) {
-      print('Building Card for: ' + cities[i]);
       setState(() {
         myCityCards.add(
             Card(
@@ -88,7 +86,6 @@ class _LocationScreenState extends State<LocationScreen> {
               child: ReusableSummaryCard(tempCityName: cities[i].toString()),
             ),
         );
-        print(cities[i].toString() + myCityCards.length.toString());
       });
     }
     return myCityCards;

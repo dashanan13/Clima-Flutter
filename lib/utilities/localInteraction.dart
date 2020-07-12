@@ -35,11 +35,7 @@ class LocalStorage {
   }
 
   Future<void> writeFile({@required FileMode writeMode, @required String inputText, @required bool isCityNameFile}) async {
-    if (await isnewlaunch()) {
-      print('Writing to a new file');
-    }else{
-      print('Writing to an old file');
-    }
+    if (await isnewlaunch()) { newlocalFile; }
     try {
       await citylistfilepath.writeAsStringSync(inputText + '|', mode: writeMode);
 //      return await citylistfilepath.writeAsString(inputText, mode: FileMode.append);
