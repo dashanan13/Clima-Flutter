@@ -53,23 +53,14 @@ class _CityDetailsState extends State<CityDetails> {
         title: const Text('Arbeid Weather'),
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            tooltip: 'New City',
-            onPressed: () {
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',
-            onPressed: () {
-
-            },
+            onPressed: null,
           ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',
-            onPressed: () {
-            },
+            onPressed: null,
           ),
         ],
       ),

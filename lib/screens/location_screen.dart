@@ -75,7 +75,9 @@ class _LocationScreenState extends State<LocationScreen> {
   }
 
   Future<List<Card>> buildcards() async {
-    var cities = await lStorageloc.readFile(isCityNameFile: true);
+    print('buildcards: Reading the City files to make cards');
+    var cities = await lStorageloc.readFile();
+    print('buildcards: Cards needed for ${cities.toString()}');
     myCityCards.clear();
     for (var i=0 ; i< (cities.length -1) ; i++) {
       setState(() {
@@ -88,6 +90,8 @@ class _LocationScreenState extends State<LocationScreen> {
         );
       });
     }
+    print('buildcards: Cards number returning: ${myCityCards.length}');
+    print('buildcards: Cards number returning: ${myCityCards.toString()}');
     return myCityCards;
   }
 

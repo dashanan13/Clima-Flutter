@@ -32,7 +32,7 @@ class MyDialogState extends State<MyDialog> {
   List<String> _suggestions = [];
   GPlaces gplaces = GPlaces();
   String updateCity;
-  bool _btnEnable=false;
+  bool _btnEnable;
 
   // Create a text controller. Later, use it to retrieve the
   // current value of the TextField.
@@ -43,7 +43,7 @@ class MyDialogState extends State<MyDialog> {
 
   void initState() {
     super.initState();
-    print('init');
+    print('initState: init');
     _suggestions = [
       'Type the name of a city, wait for the suggestions and ',
       'select a location from suggestions.',
@@ -51,6 +51,7 @@ class MyDialogState extends State<MyDialog> {
     ];
     searchController.clearComposing();
     searchController.clear();
+    _btnEnable=false;
   }
 
   //TODO: Make sure to implement dispose function such that TextEditingController is disposed and so is the the dialog
@@ -115,6 +116,10 @@ class MyDialogState extends State<MyDialog> {
                   if (text == null) {
                       searchController.selection = TextSelection.collapsed(offset: 0);
                     }
+                  setState(() {
+                    if(_suggestions.contains(searchController.text)) {_btnEnable =true;}
+                    else { _btnEnable=false; }
+                  });
                   resetSugggestions(text);
                 },
               ),
@@ -136,18 +141,7 @@ class MyDialogState extends State<MyDialog> {
                         borderRadius: new BorderRadius.circular(20.0)),
                     color: Colors.green.withOpacity(.8),
                     elevation: 20,
-                    onPressed: () async {
-                      var temp = await lStorage.readFile(isCityNameFile: true);
-                      if (temp.contains(updateCity)){
-
-                        setState(() {
-                          _suggestions = ['This city already exists', 'in the weather list.', 'You could try a new city!'];
-                        });
-                      }else {
-                        print('Writing to Cities file');
-                        await lStorage.writeFile(writeMode: FileMode.append, inputText: updateCity, isCityNameFile: true);
-                      }
-                    },
+                    onPressed: _btnEnable ? () {_saveNewCity();} : null,
                     child: Text(
                       widget.okButtonText,
                       style: TextStyle(
@@ -155,7 +149,6 @@ class MyDialogState extends State<MyDialog> {
                       ),
                     ),
                   ),
-
 //                  SizedBox(
 //                    width: 20,
 //                  ),
@@ -183,6 +176,23 @@ class MyDialogState extends State<MyDialog> {
         ),
       ),
     );
+  }
+
+  Future<void> _saveNewCity() async {
+    {
+     var temp = await lStorage.readFile();
+     if (temp.contains(updateCity)){
+       setState(() {
+         _suggestions = ['This city already exists', 'in the weather list.', 'You could try a new city!'];
+       });
+     }else {
+       print('_saveNewCity: Writing to Cities file');
+       await lStorage.writeFile(inputText: updateCity);
+       setState(() {
+         _suggestions = ['City is now added', 'Go back from dialog to check it', 'or you could search a new city!'];
+       });
+     }
+   }
   }
 
   List<Widget> _suggestionSpace() {

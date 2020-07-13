@@ -24,8 +24,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   void getLocationData() async {
-
-    await lStorage.writeFile(writeMode: FileMode.write, inputText: 'Local', isCityNameFile: null);
+    if ((await lStorage.IsNewLaunch())) { await lStorage.writeFile(inputText: 'Local'); }
+    print('getLocationData: City files path: ${lStorage.citylistfilepath.path}');
+    print('getLocationData: City files content: ${lStorage.citylistfilepath.readAsStringSync().toString().split('|')}');
     var weatherData = await weatherModel.getLocationWeather();
     Navigator.push(
       context,
@@ -49,8 +50,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
           width: 100,
         ),
       ),
-
-
 //      body: Center(
 //        child: RaisedButton(
 //          onPressed: () {
