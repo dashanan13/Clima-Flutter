@@ -21,12 +21,15 @@ class _ReusableSummaryCardState extends State<ReusableSummaryCard> {
   WeatherModel weather = WeatherModel();
 //  String _temperature, _weatherMessage, _cityName, _countryName, _dateTimeData;
 //  Image _weatherIcon;
+  // Repeatedly call for refresh
+  Timer timer;
+
   Image _weatherIcon = Image.asset(
     'images/error_weather.png',
     height: 80,
     width: 80,
   );
-  String _temperature = '-°';
+  String _temperature = 'Swipe to remove';
   String _weatherMessage = 'Internet or API error';
   String _cityName = '-';
   String _countryName = '-';
@@ -36,6 +39,10 @@ class _ReusableSummaryCardState extends State<ReusableSummaryCard> {
   void initState() {
     super.initState();
     getCityWeather();
+  }
+  void dispose() {
+    super.dispose();
+    timer.cancel();
   }
 
   Future<void> getCityWeather() async {
@@ -48,40 +55,40 @@ class _ReusableSummaryCardState extends State<ReusableSummaryCard> {
   }
 
   void getCitySummary(dynamic _cityWeatherData, String tempCityName) {
-    setState(() {
-      if (tempCityName.length > 0) {
-        if (_cityWeatherData != null) {
-          this._temperature =
-              ((double.parse((_cityWeatherData['main']['temp']).toString()))
-                          .toInt())
-                      .toString() +
-                  '°';
-          String iconName = (_cityWeatherData['weather'][0]['icon']).toString();
-          this._weatherIcon = Image.asset(
-            'images/$iconName@2x.png',
-            height: 80,
-            width: 80,
-          );
-          this._weatherMessage = _cityWeatherData['weather'][0]['main'];
-          this._cityName = _cityWeatherData['name'];
-          this._countryName = _cityWeatherData['sys']['country'];
-          DateTime tempdttm = DateTime.fromMillisecondsSinceEpoch(((_cityWeatherData['dt']) + (_cityWeatherData['timezone'])) *1000,isUtc: true);
-          this._dateTimeData ='${tempdttm.day}-${tempdttm.month}-${tempdttm.year} ${tempdttm.hour}:${tempdttm.minute}';
+    if (mounted) {
+      setState(() {
+//        print('getCitySummary: Mounted: $tempCityName');
+        if (tempCityName.length > 0) {
+          if (_cityWeatherData != null) {
+            this._temperature = ((double.parse((_cityWeatherData['main']['temp']).toString())).toInt()).toString() + '°';
+            String iconName = (_cityWeatherData['weather'][0]['icon']).toString();
+            this._weatherIcon = Image.asset(
+              'images/$iconName@2x.png',
+              height: 80,
+              width: 80,
+            );
+            this._weatherMessage = _cityWeatherData['weather'][0]['main'];
+            this._cityName = _cityWeatherData['name'];
+            this._countryName = _cityWeatherData['sys']['country'];
+            DateTime tempdttm = DateTime.fromMillisecondsSinceEpoch(((_cityWeatherData['dt']) + (_cityWeatherData['timezone'])) *1000,isUtc: true);
+            this._dateTimeData ='${tempdttm.day}-${tempdttm.month}-${tempdttm.year} ${tempdttm.hour}:${tempdttm.minute}';
+          } else {
+            _weatherMessage = 'Internet or API error';
+          }
         } else {
-          _weatherMessage = 'Internet or API error';
+          _weatherMessage = 'City name is 0 characters';
         }
-      } else {
-        _weatherMessage = 'City name is 0 characters';
-      }
-    });
+      });
+    }else{
+      print('getCitySummary: Not Mounted: $tempCityName');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     // Repeatedly call for refresh
-    new Timer.periodic(Duration(minutes: 60), (Timer t) => setState((){
-      getCityWeather();
-    }));
+    if (mounted) { timer = new Timer.periodic(Duration(minutes: 60), (Timer t) => { setState((){ print('build:'); getCityWeather(); }) }); }
+    else { dispose(); }
 
     return ReusableCard(
       colour: Colors.black.withOpacity(0.8),
@@ -95,7 +102,7 @@ class _ReusableSummaryCardState extends State<ReusableSummaryCard> {
         }
       },
       cardChild: Padding(
-        padding: const EdgeInsets.only(left: 10),
+        padding: const EdgeInsets.fromLTRB(10, 5, 0, 5),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -144,9 +151,14 @@ class _ReusableSummaryCardState extends State<ReusableSummaryCard> {
                   icon: const Icon(Icons.refresh),
                   tooltip: 'Refresh',
                   onPressed: () {
-                    setState(() {
-                      getCityWeather();
-                    });
+                    if (mounted) {
+                      setState(() {
+                        print('build: IconButton:  Mounted');
+                        getCityWeather();
+                      });
+                    }else{
+                      print('build: IconButton: NOT Mounted');
+                    }
                   },
                 ),
               ],

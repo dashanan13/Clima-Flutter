@@ -51,6 +51,7 @@ class _CityDetailsState extends State<CityDetails> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Arbeid Weather'),
+        backgroundColor: Colors.teal,
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.refresh),

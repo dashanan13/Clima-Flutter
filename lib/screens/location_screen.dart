@@ -15,8 +15,7 @@ class LocationScreen extends StatefulWidget {
 
 class _LocationScreenState extends State<LocationScreen> {
   LocalStorage lStorageloc = LocalStorage();
-  List<Card> myCityCards = [];
-
+  List<ReusableSummaryCard> myCityCards = [];
 
   @override
   void initState() {
@@ -30,6 +29,7 @@ class _LocationScreenState extends State<LocationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Arbeid Weather'),
+        backgroundColor: Colors.teal,
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
@@ -63,10 +63,45 @@ class _LocationScreenState extends State<LocationScreen> {
         constraints: BoxConstraints.expand(),
         child: SafeArea(
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: myCityCards,
+            child: Container(
+            height: MediaQuery.of(context).size.height,
+              child: ListView.builder(
+                itemCount: myCityCards.length,
+                itemBuilder: (context, index) {
+                  final item = myCityCards[index];
+                  if(item.tempCityName.toString() == 'Local') { return item; }
+                  else {
+                    return Dismissible(
+                      // Each Dismissible must contain a Key. Keys allow Flutter to
+                      // uniquely identify widgets.
+                      key: Key(item.tempCityName),
+                      // Provide a function that tells the app
+                      // what to do after an item has been swiped away.
+                      onDismissed: (direction) async {
+                        // Remove the item from the data source.
+                        if (mounted) {
+                          print('onDismissed: Mounted $index');
+                          var temp = await lStorageloc.readFile();
+                          print('onDismissed: reduced list');
+                          temp.removeAt(index);
+                          lStorageloc.removeItem(inputText: temp);
+                          setState(() {
+                            myCityCards.removeAt(index);
+                          });
+                        }else{
+                          print('onDismissed: NOT Mounted $index');
+                        }
+                        // Then show a snackbar.
+                        Scaffold.of(context)
+                            .showSnackBar(SnackBar(content: Text("${item.tempCityName} dismissed")));
+                      },
+                      // Show a red background as the item is swiped away.
+                      background: Container(color: Colors.red),
+                      child: item,
+                    );
+                  }
+                },
+              ),
             ),
           ),
         ),
@@ -74,24 +109,21 @@ class _LocationScreenState extends State<LocationScreen> {
     );
   }
 
-  Future<List<Card>> buildcards() async {
+  Future<List<ReusableSummaryCard>> buildcards() async {
     print('buildcards: Reading the City files to make cards');
     var cities = await lStorageloc.readFile();
     print('buildcards: Cards needed for ${cities.toString()}');
     myCityCards.clear();
     for (var i=0 ; i< (cities.length -1) ; i++) {
-      setState(() {
-        myCityCards.add(
-            Card(
-              color: Colors.black.withOpacity(0.0),
-              margin: EdgeInsets.all(0.0),
-              child: ReusableSummaryCard(tempCityName: cities[i].toString()),
-            ),
-        );
-      });
+      if ((cities[i].toString().length > 0)){
+        setState(() {
+          myCityCards.add(
+            ReusableSummaryCard(tempCityName: cities[i].toString()),
+          );
+        });
+      }
     }
     print('buildcards: Cards number returning: ${myCityCards.length}');
-    print('buildcards: Cards number returning: ${myCityCards.toString()}');
     return myCityCards;
   }
 
